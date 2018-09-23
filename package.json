@@ -1,0 +1,30 @@
+{
+  "name": "serverless-resources",
+  "version": "1.0.0",
+  "description": "Analyze AWS Cloudfront resources from serverless file/project",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "github.com/rhdeck/serverless-resources"
+  },
+  "keywords": [
+    "serverless",
+    "aws",
+    "cloudformation"
+  ],
+  "author": "Ray Deck",
+  "license": "ISC",
+  "bin": {
+    "serverless-resources": "cli.js",
+    "sr": "cli.js"
+  },
+  "dependencies": {
+    "aws-sdk": "^2.320.0",
+    "commander": "^2.18.0",
+    "serverless": "^1.32.0",
+    "yaml": "^1.0.0"
+  }
+}
