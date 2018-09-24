@@ -28,17 +28,16 @@ module.exports = async cmd => {
     .listStackResources({ StackName: `${service}-${stage}` })
     .promise();
   const obj = StackResourceSummaries.reduce((out, o) => {
-    if (!out) out = {};
     out[o.LogicalResourceId] = o.PhysicalResourceId;
     return out;
-  });
+  }, {});
   if (cmd.json) {
-    const json = JSON.stringify(obj);
-    console.log(json);
+    const json = JSON.stringify(obj, null, 2);
+    return json;
   } else if (cmd.yaml) {
     const yml = yaml.stringify(obj);
-    console.log(yml);
+    return yml;
   } else {
-    console.log(obj);
+    return obj;
   }
 };
