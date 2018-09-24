@@ -1,5 +1,5 @@
 const yaml = require("yaml");
-const { CloudFormation } = require("aws-sdk");
+const { CloudFormation, DynamoDB } = require("aws-sdk");
 const Path = require("path");
 const fs = require("fs");
 
@@ -27,10 +27,23 @@ module.exports = async cmd => {
   })
     .listStackResources({ StackName: `${service}-${stage}` })
     .promise();
-  const obj = StackResourceSummaries.reduce((out, o) => {
+  let obj = StackResourceSummaries.reduce((out, o) => {
     out[o.LogicalResourceId] = o.PhysicalResourceId;
     return out;
   }, {});
+  const promises = Object.keys(obj).map(async k => {
+    try {
+      const {
+        Table: { LatestStreamArn }
+      } = await new DynamoDB({
+        region: region
+      })
+        .describeTable({ TableName: obj[k] })
+        .promise();
+      obj[k + "-stream"] = LatestStreamArn;
+    } catch (e) {}
+  });
+  await Promise.all(promises);
   if (cmd.json) {
     const json = JSON.stringify(obj, null, 2);
     return json;
