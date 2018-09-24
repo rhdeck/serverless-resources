@@ -1,12 +1,6 @@
 #!/usr/bin/env node
-const yaml = require("yaml");
-const AWS = require("aws-sdk");
 const commander = require("commander");
-const { CloudFormation } = AWS;
-const Path = require("path");
-const fs = require("fs");
 const sr = require("./");
-console.log("Starting in ", process.cwd());
 commander
   .command("info")
   .description("Get information in JSON format for this command")
