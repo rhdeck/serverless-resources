@@ -84,6 +84,7 @@ module.exports = async cmd => {
         );
         break;
       case "AWS::SQS::Queue":
+        obj[`${k}-url`] = resource.PhysicalResourceId;
         obj[k] = await getArnForQueue(resource.PhysicalResourceId, region);
         break;
       default:
