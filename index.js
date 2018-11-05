@@ -92,6 +92,17 @@ module.exports = async cmd => {
     }
   });
   await Promise.all(promises);
+  const {
+    Stacks: [{ Outputs }]
+  } = await new CloudFormation({
+    region: region
+  })
+    .describeStacks({ StackName: `${service}-${stage}` })
+    .promise();
+  Outputs.forEach(({ OutputKey, OutputValue }) => {
+    obj[OutputKey] = OutputValue;
+  });
+
   if (cmd.json) {
     const json = JSON.stringify(obj, null, 2);
     return json;
