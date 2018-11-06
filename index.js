@@ -1,5 +1,5 @@
 const yaml = require("yaml");
-const { CloudFormation, DynamoDB, SQS } = require("aws-sdk");
+const { CloudFormation, DynamoDB, SQS, AppSync } = require("aws-sdk");
 const Path = require("path");
 const fs = require("fs");
 function getServiceName(path) {
@@ -54,7 +54,7 @@ async function getStreamArnForDatabaseTable(tableName, region) {
 function isDDBResource(resource) {
   return resource.ResourceType === "AWS::DynamoDB::Table";
 }
-module.exports = async cmd => {
+module.exports.getResources = async cmd => {
   const region = cmd.region || "us-east-1";
   const stage = cmd.stage || "dev";
   const service = cmd.service || getServiceName(cmd.path);
@@ -118,4 +118,40 @@ module.exports = async cmd => {
   } else {
     return obj;
   }
+};
+
+module.exports.getAppSync = async (appResources, cmd) => {
+  const region = cmd.region || "us-east-1";
+  return (await Promise.all(
+    Object.entries(appResources)
+      .filter(([key, _]) => {
+        return key.indexOf("GraphQlApi") > -1;
+      })
+      .map(([_, value]) => {
+        const apiIdPrefix = "apis/";
+        let index = value.indexOf(apiIdPrefix);
+        return value.substr(index + apiIdPrefix.length);
+      })
+      .map(async apiId => {
+        try {
+          let { graphqlApi } = await new AppSync({ region })
+            .getGraphqlApi({ apiId })
+            .promise();
+          return graphqlApi;
+        } catch (error) {}
+      })
+  ))[0];
+};
+module.exports.getAPIKey = async (apiId, cmd, doMake = true) => {
+  const region = cmd.region || "us-east-1";
+  let { apiKeys } = await new AppSync({ region })
+    .listApiKeys({
+      apiId
+    })
+    .promise();
+  return await (apiKeys.length &&
+  apiKeys[0].expires > Math.floor(Date.now() / 1000)
+    ? apiKeys[0]
+    : doMake &&
+      new AppSync({ region }).createApiKey({ apiId: appsyncAPI.apiId }));
 };
