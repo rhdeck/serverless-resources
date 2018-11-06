@@ -58,22 +58,28 @@ module.exports = async cmd => {
   const region = cmd.region || "us-east-1";
   const stage = cmd.stage || "dev";
   const service = cmd.service || getServiceName(cmd.path);
-  const { StackResourceSummaries } = await new CloudFormation({
-    region: region
-  })
-    .listStackResources({ StackName: `${service}-${stage}` })
-    .promise();
-
-  let obj = StackResourceSummaries.reduce((out, o) => {
-    out[o.LogicalResourceId] = o;
-    if (isDDBResource(o)) {
-      out[o.LogicalResourceId + "-stream"] = {
-        PhysicalResourceId: o.PhysicalResourceId,
-        ResourceType: "Custom::DDB::Stream"
-      };
-    }
-    return out;
-  }, {});
+  let thisToken = null;
+  let obj = {};
+  do {
+    const { StackResourceSummaries, NextToken } = await new CloudFormation({
+      region: region
+    })
+      .listStackResources({
+        StackName: `${service}-${stage}`,
+        NextToken: thisToken
+      })
+      .promise();
+    StackResourceSummaries.forEach(o => {
+      obj[o.LogicalResourceId] = o;
+      if (isDDBResource(o)) {
+        obj[o.LogicalResourceId + "-stream"] = {
+          PhysicalResourceId: o.PhysicalResourceId,
+          ResourceType: "Custom::DDB::Stream"
+        };
+      }
+    });
+    thisToken = NextToken;
+  } while (thisToken);
   const promises = Object.keys(obj).map(async k => {
     let resource = obj[k];
     switch (resource.ResourceType) {
@@ -92,16 +98,16 @@ module.exports = async cmd => {
     }
   });
   await Promise.all(promises);
-  const {
-    Stacks: [{ Outputs }]
-  } = await new CloudFormation({
-    region: region
-  })
-    .describeStacks({ StackName: `${service}-${stage}` })
-    .promise();
-  Outputs.forEach(({ OutputKey, OutputValue }) => {
-    obj[OutputKey] = OutputValue;
-  });
+  // const {
+  //   Stacks: [{ Outputs }]
+  // } = await new CloudFormation({
+  //   region: region
+  // })
+  //   .describeStacks({ StackName: `${service}-${stage}` })
+  //   .promise();
+  // Outputs.forEach(({ OutputKey, OutputValue }) => {
+  //   obj[OutputKey] = OutputValue;
+  // });
 
   if (cmd.json) {
     const json = JSON.stringify(obj, null, 2);
