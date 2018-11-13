@@ -1,25 +1,63 @@
 const yaml = require("yaml");
 const { CloudFormation, DynamoDB, SQS, AppSync } = require("aws-sdk");
 const Path = require("path");
-const fs = require("fs");
-function getServiceName(path) {
-  let name =
-    path &&
-    yaml.parse(
-      fs.readFileSync(
-        path.endsWith(".yml") ? path : Path.join(path, "serverless.yml"),
-        { encoding: "UTF8" }
+const { readFileSync, existsSync } = require("fs");
+const { join, dirname, resolve } = require("path");
+const fixYamlFile = path =>
+  existsSync(path)
+    ? fixYaml(
+        yaml.parse(readFileSync(path, { encoding: "UTF8" })),
+        dirname(path)
       )
-    ).service;
-  if (!name) {
-    name = yaml.parse(
-      fs.readFileSync(Path.join(process.cwd(), "serverless.yml"), {
-        encoding: "UTF8"
-      })
-    ).service;
+    : {};
+const fixYaml = (y, path) => {
+  if (!path) path = process.cwd();
+  if (y.custom) {
+    y.custom = Object.entries(y.custom).reduce((o, [k, v]) => {
+      const matches = typeof v == "string" && v.match(/\$\{file(.*)}/);
+      if (matches) {
+        const tailpath = matches[1].substring(1, matches[1].length - 1);
+        const x = require(join(path, tailpath));
+        v = x;
+      }
+      o[k] = v;
+      return o;
+    }, {});
   }
-  return name;
-}
+  //Traverse the tree looking for other self:custom winners
+  const fix = o => {
+    Object.entries(o).forEach(([k, v]) => {
+      switch (typeof v) {
+        case "string":
+          o[k] = v.replace(/\$\{self.custom([^\$]*)}/g, (a, b) => {
+            const pieces = b.split(".").filter(Boolean);
+            return pieces.reduce(
+              (a, k) => {
+                a = a[k];
+                return a;
+              },
+              { ...y.custom }
+            );
+          });
+          break;
+        case "object":
+          fix(v);
+      }
+    });
+  };
+  fix(y);
+  return y;
+};
+const getServiceName = path => {
+  return path
+    ? fixYamlFile(
+        path.endsWith(".yml")
+          ? resolve(path)
+          : Path.join(resolve(path), "serverless.yml")
+      ).service
+    : fixYamlFile(Path.join(process.cwd(), "serverless.yml")).service;
+};
+
 async function getArnForQueue(url, region) {
   try {
     const {
@@ -34,7 +72,7 @@ async function getArnForQueue(url, region) {
       .promise();
     return QueueArn;
   } catch (error) {
-    console.log("SQS Error>", error);
+    console.error("SQS Error>", error);
   }
 }
 async function getStreamArnForDatabaseTable(tableName, region) {
@@ -48,7 +86,7 @@ async function getStreamArnForDatabaseTable(tableName, region) {
       .promise();
     return LatestStreamArn;
   } catch (error) {
-    console.log("Database Error>", error);
+    console.error("Database Error>", error);
   }
 }
 function isDDBResource(resource) {
@@ -58,6 +96,7 @@ module.exports.getResources = async cmd => {
   const region = cmd.region || "us-east-1";
   const stage = cmd.stage || "dev";
   const service = cmd.service || getServiceName(cmd.path);
+  if (!service) return {};
   let thisToken = null;
   let obj = {};
   do {
@@ -98,16 +137,6 @@ module.exports.getResources = async cmd => {
     }
   });
   await Promise.all(promises);
-  // const {
-  //   Stacks: [{ Outputs }]
-  // } = await new CloudFormation({
-  //   region: region
-  // })
-  //   .describeStacks({ StackName: `${service}-${stage}` })
-  //   .promise();
-  // Outputs.forEach(({ OutputKey, OutputValue }) => {
-  //   obj[OutputKey] = OutputValue;
-  // });
 
   if (cmd.json) {
     const json = JSON.stringify(obj, null, 2);
