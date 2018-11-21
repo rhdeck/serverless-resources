@@ -1,5 +1,5 @@
 const yaml = require("yaml");
-const { CloudFormation, DynamoDB, SQS, AppSync } = require("aws-sdk");
+const { CloudFormation, DynamoDB, SQS, AppSync, IAM } = require("aws-sdk");
 const Path = require("path");
 const { readFileSync, existsSync } = require("fs");
 const { join, dirname, resolve } = require("path");
@@ -92,6 +92,16 @@ async function getStreamArnForDatabaseTable(tableName, region) {
 function isDDBResource(resource) {
   return resource.ResourceType === "AWS::DynamoDB::Table";
 }
+async function getArnForRole(role, region) {
+  try {
+    const {
+      Role: { Arn }
+    } = await new IAM({ region }).getRole({ RoleName: role }).promise();
+    return Arn;
+  } catch (error) {
+    console.error("IAM Error", error);
+  }
+}
 module.exports.getResources = async cmd => {
   const region = cmd.region || "us-east-1";
   const stage = cmd.stage || "dev";
@@ -131,6 +141,13 @@ module.exports.getResources = async cmd => {
       case "AWS::SQS::Queue":
         obj[`${k}-url`] = resource.PhysicalResourceId;
         obj[k] = await getArnForQueue(resource.PhysicalResourceId, region);
+        break;
+      case "AWS::IAM::Role":
+        obj[k] = resource.PhysicalResourceId;
+        obj[k + "-arn"] = await getArnForRole(
+          resource.PhysicalResourceId,
+          region
+        );
         break;
       default:
         obj[k] = resource.PhysicalResourceId;
