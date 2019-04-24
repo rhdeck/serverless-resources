@@ -145,7 +145,6 @@ module.exports.getResources = async cmd => {
   } while (thisToken);
   const promises = Object.keys(obj).map(async k => {
     let resource = obj[k];
-    console.log(resource.ResourceType);
     switch (resource.ResourceType) {
       case "Custom::DDB::Stream":
         obj[k] = await getStreamArnForDatabaseTable(
@@ -165,7 +164,6 @@ module.exports.getResources = async cmd => {
         );
         break;
       case "AWS::DynamoDB::Table":
-        console.log("Here we go!!");
         obj[k] = resource.PhysicalResourceId;
         obj[k + "-arn"] = await getArnForDatabaseTable(
           resource.PhysicalResourceId,
