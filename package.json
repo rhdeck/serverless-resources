@@ -4,7 +4,9 @@
   "description": "Analyze AWS Cloudfront resources from serverless file/project",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node cli.js info",
+    "help": "node cli.js --help"
   },
   "repository": {
     "type": "git",
