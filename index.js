@@ -1,5 +1,12 @@
 const yaml = require("yaml");
-const { CloudFormation, DynamoDB, SQS, AppSync, IAM } = require("aws-sdk");
+const {
+  CloudFormation,
+  DynamoDB,
+  SQS,
+  AppSync,
+  IAM,
+  Lambda
+} = require("aws-sdk");
 const Path = require("path");
 const { readFileSync, existsSync } = require("fs");
 const { join, dirname, resolve } = require("path");
@@ -80,7 +87,7 @@ async function getStreamArnForDatabaseTable(tableName, region) {
     const {
       Table: { LatestStreamArn }
     } = await new DynamoDB({
-      region: region
+      region
     })
       .describeTable({ TableName: tableName })
       .promise();
@@ -94,11 +101,24 @@ async function getArnForDatabaseTable(tableName, region) {
     const {
       Table: { TableArn }
     } = await new DynamoDB({
-      region: region
+      region
     })
       .describeTable({ TableName: tableName })
       .promise();
     return TableArn;
+  } catch (error) {
+    console.error("Database Error>", error);
+  }
+}
+
+async function getArnForLambda(functionName, region) {
+  try {
+    const {
+      Versions: [{ FunctionArn }]
+    } = await new Lambda({ region })
+      .listVersionsByFunction({ FunctionName: functionName })
+      .promise();
+    return FunctionArn;
   } catch (error) {
     console.error("Database Error>", error);
   }
@@ -143,8 +163,7 @@ module.exports.getResources = async cmd => {
     });
     thisToken = NextToken;
   } while (thisToken);
-  const promises = Object.keys(obj).map(async k => {
-    let resource = obj[k];
+  const promises = Object.entries(obj).map(async ([k, resource]) => {
     switch (resource.ResourceType) {
       case "Custom::DDB::Stream":
         obj[k] = await getStreamArnForDatabaseTable(
@@ -166,6 +185,12 @@ module.exports.getResources = async cmd => {
       case "AWS::DynamoDB::Table":
         obj[k] = resource.PhysicalResourceId;
         obj[k + "-arn"] = await getArnForDatabaseTable(
+          resource.PhysicalResourceId,
+          region
+        );
+      case "AWS::Lambda::Function":
+        obj[k] = resource.PhysicalResourceId;
+        obj[[k, "arn"].join("-")] = await getArnForLambda(
           resource.PhysicalResourceId,
           region
         );
