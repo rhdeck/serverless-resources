@@ -188,12 +188,14 @@ module.exports.getResources = async cmd => {
           resource.PhysicalResourceId,
           region
         );
+        break;
       case "AWS::Lambda::Function":
         obj[k] = resource.PhysicalResourceId;
         obj[[k, "arn"].join("-")] = await getArnForLambda(
           resource.PhysicalResourceId,
           region
         );
+        break;
       default:
         obj[k] = resource.PhysicalResourceId;
     }
