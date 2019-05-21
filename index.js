@@ -129,12 +129,15 @@ async function getUnqualifiedArnForLambda(functionName, region) {
   try {
     const {
       Configuration: { FunctionArn }
-    } = await new Lambda({ region }).getFunction({
-      FunctionName: functionName
-    });
+    } = await new Lambda({ region })
+      .getFunction({
+        FunctionName: functionName
+      })
+      .promise();
     return FunctionArn;
-  } catch (e) {}
-  console.error("Lambda error", error);
+  } catch (error) {
+    console.error("Lambda error", error);
+  }
 }
 function isDDBResource(resource) {
   return resource.ResourceType === "AWS::DynamoDB::Table";
