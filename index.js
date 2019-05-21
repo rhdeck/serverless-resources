@@ -118,10 +118,23 @@ async function getArnForLambda(functionName, region) {
     } = await new Lambda({ region })
       .listVersionsByFunction({ FunctionName: functionName })
       .promise();
+
     return FunctionArn;
   } catch (error) {
-    console.error("Database Error>", error);
+    console.error("Lambda Error>", error);
   }
+}
+
+async function getUnqualifiedArnForLambda(functionName, region) {
+  try {
+    const {
+      Configuration: { FunctionArn }
+    } = await new Lambda({ region }).getFunction({
+      FunctionName: functionName
+    });
+    return FunctionArn;
+  } catch (e) {}
+  console.error("Lambda error", error);
 }
 function isDDBResource(resource) {
   return resource.ResourceType === "AWS::DynamoDB::Table";
@@ -195,6 +208,13 @@ module.exports.getResources = async cmd => {
           resource.PhysicalResourceId,
           region
         );
+        obj[
+          [k, "arn-unqualified"].join("-")
+        ] = await getUnqualifiedArnForLambda(
+          resource.PhysicalResourceId,
+          region
+        );
+
         break;
       default:
         obj[k] = resource.PhysicalResourceId;
