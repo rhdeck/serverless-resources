@@ -111,6 +111,24 @@ async function getArnForDatabaseTable(tableName, region) {
   }
 }
 
+async function getGSIsForDatabaseTable(tableName, region) {
+  try {
+    const {
+      Table: { GlobalSecondaryIndexes }
+    } = await new DynamoDB({
+      region
+    })
+      .describeTable({ TableName: tableName })
+      .promise();
+    return GlobalSecondaryIndexes
+      ? GlobalSecondaryIndexes.map(({ IndexName }) => IndexName)
+      : [];
+    // return TableArn;
+  } catch (error) {
+    console.error("Database Error>", error);
+  }
+}
+
 async function getArnForLambda(functionName, region) {
   try {
     const {
@@ -204,6 +222,11 @@ module.exports.getResources = async cmd => {
           resource.PhysicalResourceId,
           region
         );
+        const GSIs = await getGSIsForDatabaseTable(
+          resource.PhysicalResourceId,
+          region
+        );
+        GSIs.forEach(indexName => (obj[k + "GSI"] = indexName));
         break;
       case "AWS::Lambda::Function":
         obj[k] = resource.PhysicalResourceId;
