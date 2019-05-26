@@ -10,5 +10,6 @@ commander
   .option("-p --path <path>")
   .option("-r --region <region>")
   .option("-t --stage <stage>")
+  .option("-a --aws-profile <profile>")
   .action(async args => console.log(await getResources(args)));
 commander.parse(process.argv);
