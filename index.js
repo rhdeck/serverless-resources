@@ -116,7 +116,9 @@ async function getGSIsForDatabaseTable(tableName, region) {
       .describeTable({ TableName: tableName })
       .promise();
     return GlobalSecondaryIndexes
-      ? GlobalSecondaryIndexes.map(({ IndexName }) => IndexName)
+      ? GlobalSecondaryIndexes.map(({ IndexName, IndexArn }) => {
+          ({ name: IndexName, arn: IndexArn });
+        })
       : [];
     // return TableArn;
   } catch (error) {
@@ -222,7 +224,10 @@ module.exports.getResources = async cmd => {
           resource.PhysicalResourceId,
           region
         );
-        GSIs.forEach(indexName => (obj[k + "GSI"] = indexName));
+        GSIs.forEach(({ name, arn }) => {
+          obj[k + "GSI"] = name;
+          obj[k + "GSI-arn"] = arn;
+        });
         break;
       case "AWS::Lambda::Function":
         obj[k] = resource.PhysicalResourceId;
