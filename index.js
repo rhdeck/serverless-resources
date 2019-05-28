@@ -116,9 +116,10 @@ async function getGSIsForDatabaseTable(tableName, region) {
       .describeTable({ TableName: tableName })
       .promise();
     return GlobalSecondaryIndexes
-      ? GlobalSecondaryIndexes.map(({ IndexName, IndexArn }) => {
-          ({ name: IndexName, arn: IndexArn });
-        })
+      ? GlobalSecondaryIndexes.map(({ IndexName, IndexArn }) => ({
+          name: IndexName,
+          arn: IndexArn
+        }))
       : [];
     // return TableArn;
   } catch (error) {
