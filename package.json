@@ -1,6 +1,6 @@
 {
   "name": "serverless-resources",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Analyze AWS Cloudfront resources from serverless file/project",
   "main": "index.js",
   "scripts": {
