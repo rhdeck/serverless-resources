@@ -28,6 +28,7 @@ const fixYaml = (y, path) => {
   }
   //Traverse the tree looking for other self:custom winners
   const fix = o => {
+    if (!o) return;
     Object.entries(o).forEach(([k, v]) => {
       switch (typeof v) {
         case "string":
