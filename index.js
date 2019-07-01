@@ -4,7 +4,7 @@ const { CloudFormation, DynamoDB, SQS, AppSync, IAM, Lambda } = AWS;
 const Path = require("path");
 const { readFileSync, existsSync } = require("fs");
 const { join, dirname, resolve } = require("path");
-const { configAWS } = require("serverless-stage");
+const { configAWS, findStage } = require("serverless-stage");
 const fixYamlFile = path =>
   existsSync(path)
     ? fixYaml(
@@ -172,7 +172,7 @@ async function getArnForRole(role, region) {
 module.exports.getResources = async cmd => {
   configAWS(AWS, cmd.awsProfile);
   const region = cmd.region || "us-east-1";
-  const stage = cmd.stage || "dev";
+  const stage = cmd.stage || findStage() || "dev";
   const service = cmd.service || getServiceName(cmd.path);
   if (!service) return {};
   let thisToken = null;
