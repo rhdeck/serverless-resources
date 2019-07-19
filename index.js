@@ -127,7 +127,26 @@ async function getGSIsForDatabaseTable(tableName, region) {
     console.error("Database Error>", error);
   }
 }
-
+async function getLSIsForDatabaseTable(tableName, region) {
+  try {
+    const {
+      Table: { LocalSecondaryIndexes }
+    } = await new DynamoDB({
+      region
+    })
+      .describeTable({ TableName: tableName })
+      .promise();
+    return LocalSecondaryIndexes
+      ? LocalSecondaryIndexes.map(({ IndexName, IndexArn }) => ({
+          name: IndexName,
+          arn: IndexArn
+        }))
+      : [];
+    // return TableArn;
+  } catch (error) {
+    console.error("Database Error>", error);
+  }
+}
 async function getArnForLambda(functionName, region) {
   try {
     const {
@@ -227,8 +246,21 @@ module.exports.getResources = async cmd => {
           region
         );
         GSIs.forEach(({ name, arn }) => {
+          const base = k + "-" + name;
+          obj[base] = name;
+          obj[base + "-arn"] = arn;
+          //Legacy naming structure
           obj[k + "GSI"] = name;
           obj[k + "GSI-arn"] = arn;
+        });
+        const LSIs = await getLSIsForDatabaseTable(
+          resource.PhysicalResourceId,
+          region
+        );
+        LSIs.forEach(({ name, arn }) => {
+          const base = k + "-" + name;
+          obj[base] = name;
+          obj[base + "-arn"] = arn;
         });
         break;
       case "AWS::Lambda::Function":
