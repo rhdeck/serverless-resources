@@ -188,6 +188,35 @@ async function getArnForRole(role, region) {
     console.error("IAM Error", error);
   }
 }
+module.exports.getOutputs = async cmd => {
+  configAWS(AWS, cmd.awsProfile);
+  const region = cmd.region || "us-east-1";
+  const stage = cmd.stage || findStage() || "dev";
+  const service = cmd.service || getServiceName(cmd.path);
+  if (!service) return {};
+  let thisToken = null;
+  let obj = {};
+  const out = {};
+  do {
+    const {
+      Stacks: [{ Outputs }],
+      NextToken,
+      ...rest
+    } = await new CloudFormation({
+      region: region
+    })
+      .describeStacks({
+        StackName: `${service}-${stage}`,
+        NextToken: thisToken
+      })
+      .promise();
+    Outputs.reduce((o, { OutputKey, OutputValue }) => {
+      out[OutputKey] = OutputValue;
+    }, out);
+    thisToken = NextToken;
+  } while (thisToken);
+  return out;
+};
 module.exports.getResources = async cmd => {
   configAWS(AWS, cmd.awsProfile);
   const region = cmd.region || "us-east-1";
@@ -296,25 +325,27 @@ module.exports.getResources = async cmd => {
 
 module.exports.getAppSync = async (appResources, cmd) => {
   const region = cmd.region || "us-east-1";
-  return (await Promise.all(
-    Object.entries(appResources)
-      .filter(([key, _]) => {
-        return key.indexOf("GraphQlApi") > -1;
-      })
-      .map(([_, value]) => {
-        const apiIdPrefix = "apis/";
-        let index = value.indexOf(apiIdPrefix);
-        return value.substr(index + apiIdPrefix.length);
-      })
-      .map(async apiId => {
-        try {
-          let { graphqlApi } = await new AppSync({ region })
-            .getGraphqlApi({ apiId })
-            .promise();
-          return graphqlApi;
-        } catch (error) {}
-      })
-  ))[0];
+  return (
+    await Promise.all(
+      Object.entries(appResources)
+        .filter(([key, _]) => {
+          return key.indexOf("GraphQlApi") > -1;
+        })
+        .map(([_, value]) => {
+          const apiIdPrefix = "apis/";
+          let index = value.indexOf(apiIdPrefix);
+          return value.substr(index + apiIdPrefix.length);
+        })
+        .map(async apiId => {
+          try {
+            let { graphqlApi } = await new AppSync({ region })
+              .getGraphqlApi({ apiId })
+              .promise();
+            return graphqlApi;
+          } catch (error) {}
+        })
+    )
+  )[0];
 };
 module.exports.getAPIKey = async (apiId, cmd, doMake = true) => {
   const region = cmd.region || "us-east-1";
