@@ -4,7 +4,7 @@ const { CloudFormation, DynamoDB, SQS, AppSync, IAM, Lambda } = AWS;
 const Path = require("path");
 const { readFileSync, existsSync } = require("fs");
 const { join, dirname, resolve } = require("path");
-const { configAWS, findStage } = require("serverless-stage");
+const { configAWS, findStage } = require("@raydeck/serverless-stage");
 const fixYamlFile = path =>
   existsSync(path)
     ? fixYaml(
