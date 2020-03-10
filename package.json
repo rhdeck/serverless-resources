@@ -23,7 +23,7 @@
     "serverless-resources": "cli.js",
     "sr": "cli.js"
   },
-  "devDependencies": {
+  "dependencies": {
     "@raydeck/serverless-stage": "^2.0.0",
     "aws-sdk": "^2.320.0",
     "commander": "^2.18.0",
