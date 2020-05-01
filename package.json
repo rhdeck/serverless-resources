@@ -1,6 +1,6 @@
 {
   "name": "@raydeck/serverless-resources",
-  "version": "2.0.1",
+  "version": "2.0.2",
   "description": "Analyze AWS Cloudfront resources from serverless file/project",
   "main": "index.js",
   "scripts": {
