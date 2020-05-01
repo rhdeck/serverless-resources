@@ -5,7 +5,7 @@ const Path = require("path");
 const { readFileSync, existsSync } = require("fs");
 const { join, dirname, resolve } = require("path");
 const { configAWS, findStage } = require("@raydeck/serverless-stage");
-const fixYamlFile = path =>
+const fixYamlFile = (path) =>
   existsSync(path)
     ? fixYaml(
         yaml.parse(readFileSync(path, { encoding: "UTF8" })),
@@ -27,7 +27,7 @@ const fixYaml = (y, path) => {
     }, {});
   }
   //Traverse the tree looking for other self:custom winners
-  const fix = o => {
+  const fix = (o) => {
     if (!o) return;
     Object.entries(o).forEach(([k, v]) => {
       switch (typeof v) {
@@ -36,7 +36,7 @@ const fixYaml = (y, path) => {
             const pieces = b.split(".").filter(Boolean);
             return pieces.reduce(
               (a, k) => {
-                a = a[k];
+                if (a) a = a[k];
                 return a;
               },
               { ...y.custom }
@@ -51,7 +51,7 @@ const fixYaml = (y, path) => {
   fix(y);
   return y;
 };
-const getServiceName = path => {
+const getServiceName = (path) => {
   return path
     ? fixYamlFile(
         path.endsWith(".yml")
@@ -64,13 +64,13 @@ const getServiceName = path => {
 async function getArnForQueue(url, region) {
   try {
     const {
-      Attributes: { QueueArn }
+      Attributes: { QueueArn },
     } = await new SQS({
-      region
+      region,
     })
       .getQueueAttributes({
         QueueUrl: url,
-        AttributeNames: ["QueueArn"]
+        AttributeNames: ["QueueArn"],
       })
       .promise();
     return QueueArn;
@@ -81,9 +81,9 @@ async function getArnForQueue(url, region) {
 async function getStreamArnForDatabaseTable(tableName, region) {
   try {
     const {
-      Table: { LatestStreamArn }
+      Table: { LatestStreamArn },
     } = await new DynamoDB({
-      region
+      region,
     })
       .describeTable({ TableName: tableName })
       .promise();
@@ -95,9 +95,9 @@ async function getStreamArnForDatabaseTable(tableName, region) {
 async function getArnForDatabaseTable(tableName, region) {
   try {
     const {
-      Table: { TableArn }
+      Table: { TableArn },
     } = await new DynamoDB({
-      region
+      region,
     })
       .describeTable({ TableName: tableName })
       .promise();
@@ -110,16 +110,16 @@ async function getArnForDatabaseTable(tableName, region) {
 async function getGSIsForDatabaseTable(tableName, region) {
   try {
     const {
-      Table: { GlobalSecondaryIndexes }
+      Table: { GlobalSecondaryIndexes },
     } = await new DynamoDB({
-      region
+      region,
     })
       .describeTable({ TableName: tableName })
       .promise();
     return GlobalSecondaryIndexes
       ? GlobalSecondaryIndexes.map(({ IndexName, IndexArn }) => ({
           name: IndexName,
-          arn: IndexArn
+          arn: IndexArn,
         }))
       : [];
     // return TableArn;
@@ -130,16 +130,16 @@ async function getGSIsForDatabaseTable(tableName, region) {
 async function getLSIsForDatabaseTable(tableName, region) {
   try {
     const {
-      Table: { LocalSecondaryIndexes }
+      Table: { LocalSecondaryIndexes },
     } = await new DynamoDB({
-      region
+      region,
     })
       .describeTable({ TableName: tableName })
       .promise();
     return LocalSecondaryIndexes
       ? LocalSecondaryIndexes.map(({ IndexName, IndexArn }) => ({
           name: IndexName,
-          arn: IndexArn
+          arn: IndexArn,
         }))
       : [];
     // return TableArn;
@@ -150,7 +150,7 @@ async function getLSIsForDatabaseTable(tableName, region) {
 async function getArnForLambda(functionName, region) {
   try {
     const {
-      Versions: [{ FunctionArn }]
+      Versions: [{ FunctionArn }],
     } = await new Lambda({ region })
       .listVersionsByFunction({ FunctionName: functionName })
       .promise();
@@ -164,10 +164,10 @@ async function getArnForLambda(functionName, region) {
 async function getUnqualifiedArnForLambda(functionName, region) {
   try {
     const {
-      Configuration: { FunctionArn }
+      Configuration: { FunctionArn },
     } = await new Lambda({ region })
       .getFunction({
-        FunctionName: functionName
+        FunctionName: functionName,
       })
       .promise();
     return FunctionArn;
@@ -181,14 +181,14 @@ function isDDBResource(resource) {
 async function getArnForRole(role, region) {
   try {
     const {
-      Role: { Arn }
+      Role: { Arn },
     } = await new IAM({ region }).getRole({ RoleName: role }).promise();
     return Arn;
   } catch (error) {
     console.error("IAM Error", error);
   }
 }
-module.exports.getOutputs = async cmd => {
+module.exports.getOutputs = async (cmd) => {
   configAWS(AWS, cmd.awsProfile);
   const region = cmd.region || "us-east-1";
   const stage = cmd.stage || findStage() || "dev";
@@ -203,11 +203,11 @@ module.exports.getOutputs = async cmd => {
       NextToken,
       ...rest
     } = await new CloudFormation({
-      region: region
+      region: region,
     })
       .describeStacks({
         StackName: `${service}-${stage}`,
-        NextToken: thisToken
+        NextToken: thisToken,
       })
       .promise();
     Outputs.reduce((o, { OutputKey, OutputValue }) => {
@@ -217,7 +217,7 @@ module.exports.getOutputs = async cmd => {
   } while (thisToken);
   return out;
 };
-module.exports.getResources = async cmd => {
+module.exports.getResources = async (cmd) => {
   configAWS(AWS, cmd.awsProfile);
   const region = cmd.region || "us-east-1";
   const stage = cmd.stage || findStage() || "dev";
@@ -227,19 +227,19 @@ module.exports.getResources = async cmd => {
   let obj = {};
   do {
     const { StackResourceSummaries, NextToken } = await new CloudFormation({
-      region: region
+      region: region,
     })
       .listStackResources({
         StackName: `${service}-${stage}`,
-        NextToken: thisToken
+        NextToken: thisToken,
       })
       .promise();
-    StackResourceSummaries.forEach(o => {
+    StackResourceSummaries.forEach((o) => {
       obj[o.LogicalResourceId] = o;
       if (isDDBResource(o)) {
         obj[o.LogicalResourceId + "-stream"] = {
           PhysicalResourceId: o.PhysicalResourceId,
-          ResourceType: "Custom::DDB::Stream"
+          ResourceType: "Custom::DDB::Stream",
         };
       }
     });
@@ -336,7 +336,7 @@ module.exports.getAppSync = async (appResources, cmd) => {
           let index = value.indexOf(apiIdPrefix);
           return value.substr(index + apiIdPrefix.length);
         })
-        .map(async apiId => {
+        .map(async (apiId) => {
           try {
             let { graphqlApi } = await new AppSync({ region })
               .getGraphqlApi({ apiId })
@@ -351,7 +351,7 @@ module.exports.getAPIKey = async (apiId, cmd, doMake = true) => {
   const region = cmd.region || "us-east-1";
   let { apiKeys } = await new AppSync({ region })
     .listApiKeys({
-      apiId
+      apiId,
     })
     .promise();
   return await (apiKeys.length &&
