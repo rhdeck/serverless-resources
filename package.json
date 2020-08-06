@@ -1,6 +1,5 @@
 {
   "name": "@raydeck/serverless-resources",
-  "private": true,
   "version": "3.0.0",
   "description": "Analyze AWS Cloudfront resources from serverless file/project",
   "main": "lib/index.js",
