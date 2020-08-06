@@ -62,3 +62,4 @@ typings/
 yarn.lock
 yarn.lock
 .watchmanconfig
+lib/

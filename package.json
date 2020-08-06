@@ -1,33 +1,49 @@
 {
   "name": "@raydeck/serverless-resources",
-  "version": "2.0.2",
+  "private": true,
+  "version": "3.0.0",
   "description": "Analyze AWS Cloudfront resources from serverless file/project",
-  "main": "index.js",
+  "main": "lib/index.js",
+  "bin": "lib/bin.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node cli.js info",
-    "help": "node cli.js --help"
+    "pre-commit": "(git-branch-is --not main || (set -u && echo $ALLOWMAIN)) && yarn test",
+    "test": "tsc --noEmit",
+    "build": "tsc",
+    "docs": "typedoc --theme markdown --readme none --mode file  --excludeNotExported --includeVersion --out docstemp && mv docstemp/README.md docstemp/library.md && commanderdoc markdown lib/bin.js -o docstemp/__cli.md --cli-name serverless-resources && rm README.md ; concat-md docstemp > README.md && rm -rf docstemp",
+    "prepublishOnly": "yarn build && yarn docs && git commit README.md -m \"docs: updating docs\" && git push"
   },
   "repository": {
     "type": "git",
-    "url": "github.com/rhdeck/serverless-resources"
+    "url": "git+https://github.com/rhdeck/serverless-resources.git"
   },
-  "keywords": [
-    "serverless",
-    "aws",
-    "cloudformation"
-  ],
   "author": "Ray Deck",
-  "license": "ISC",
-  "bin": {
-    "serverless-resources": "cli.js",
-    "sr": "cli.js"
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/rhdeck/serverless-resources/issues"
   },
+  "homepage": "https://github.com/rhdeck/serverless-resources#readme",
+  "devDependencies": {
+    "@commitlint/cli": "^9.1.1",
+    "@commitlint/config-conventional": "^9.1.1",
+    "@types/node": "^14.0.27",
+    "commanderdoc": "^0.1.4",
+    "concat-md": "^0.3.5",
+    "git-branch-is": "^4.0.0",
+    "husky": "^4.2.5",
+    "typedoc": "^0.17.8",
+    "typedoc-plugin-markdown": "^2.4.0",
+    "typescript": "^3.9.7"
+  },
+  "files": [
+    "src",
+    "lib"
+  ],
   "dependencies": {
-    "@raydeck/serverless-stage": "^2.0.0",
-    "aws-sdk": "^2.320.0",
-    "commander": "^2.18.0",
-    "serverless": "^1.32.0",
-    "yaml": "^1.0.0"
+    "@raydeck/serverless-stage": "^3.0.1",
+    "aws-sdk": "^2.727.1",
+    "commander": "^6.0.0",
+    "install-peers-cli": "^2.2.0",
+    "serverless": "^1.78.1",
+    "yaml": "^1.10.0"
   }
 }
