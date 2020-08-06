@@ -52,7 +52,7 @@ serverless-resources info [options]
 
 ▸ **fixYaml**(`yamlObj`: object, `path`: string): *object*
 
-*Defined in [index.ts:32](https://github.com/rhdeck/serverless-resources/blob/4848db1/src/index.ts#L32)*
+*Defined in [index.ts:32](https://github.com/rhdeck/serverless-resources/blob/fd753e7/src/index.ts#L32)*
 
 Fill in an object with external file references
 
@@ -75,7 +75,7 @@ ___
 
 ▸ **fixYamlFile**(`path`: string): *object*
 
-*Defined in [index.ts:18](https://github.com/rhdeck/serverless-resources/blob/4848db1/src/index.ts#L18)*
+*Defined in [index.ts:18](https://github.com/rhdeck/serverless-resources/blob/fd753e7/src/index.ts#L18)*
 
 Fix a yaml file at path specified -
 
@@ -97,7 +97,7 @@ ___
 
 ▸ **getAppSync**(`appResources`: object, `cmd`: object): *Promise‹undefined | GraphqlApi›*
 
-*Defined in [index.ts:449](https://github.com/rhdeck/serverless-resources/blob/4848db1/src/index.ts#L449)*
+*Defined in [index.ts:449](https://github.com/rhdeck/serverless-resources/blob/fd753e7/src/index.ts#L449)*
 
 Get profile for Appsync resource in this stack
 
@@ -129,7 +129,7 @@ ___
 
 ▸ **getArnForDatabaseTable**(`TableName`: string, `region`: string): *Promise‹undefined | string›*
 
-*Defined in [index.ts:133](https://github.com/rhdeck/serverless-resources/blob/4848db1/src/index.ts#L133)*
+*Defined in [index.ts:133](https://github.com/rhdeck/serverless-resources/blob/fd753e7/src/index.ts#L133)*
 
 Get the arn by table name
 
@@ -150,7 +150,7 @@ ___
 
 ▸ **getArnForLambda**(`FunctionName`: string, `region`: string): *Promise‹undefined | string›*
 
-*Defined in [index.ts:216](https://github.com/rhdeck/serverless-resources/blob/4848db1/src/index.ts#L216)*
+*Defined in [index.ts:216](https://github.com/rhdeck/serverless-resources/blob/fd753e7/src/index.ts#L216)*
 
 get the arn of a lambda from the function name
 
@@ -171,7 +171,7 @@ ___
 
 ▸ **getArnForQueue**(`url`: string, `region`: string): *Promise‹undefined | string›*
 
-*Defined in [index.ts:89](https://github.com/rhdeck/serverless-resources/blob/4848db1/src/index.ts#L89)*
+*Defined in [index.ts:89](https://github.com/rhdeck/serverless-resources/blob/fd753e7/src/index.ts#L89)*
 
 **Parameters:**
 
@@ -188,7 +188,7 @@ ___
 
 ▸ **getArnForRole**(`role`: string, `region`: string): *Promise‹undefined | string›*
 
-*Defined in [index.ts:268](https://github.com/rhdeck/serverless-resources/blob/4848db1/src/index.ts#L268)*
+*Defined in [index.ts:268](https://github.com/rhdeck/serverless-resources/blob/fd753e7/src/index.ts#L268)*
 
 Get the ARN of a role by name
 
@@ -209,7 +209,7 @@ ___
 
 ▸ **getGSIsForDatabaseTable**(`TableName`: string, `region`: string): *Promise‹object[]›*
 
-*Defined in [index.ts:156](https://github.com/rhdeck/serverless-resources/blob/4848db1/src/index.ts#L156)*
+*Defined in [index.ts:156](https://github.com/rhdeck/serverless-resources/blob/fd753e7/src/index.ts#L156)*
 
 Get Global Secondary Inidices of a table
 
@@ -230,7 +230,7 @@ ___
 
 ▸ **getLSIsForDatabaseTable**(`TableName`: string, `region`: string): *Promise‹object[]›*
 
-*Defined in [index.ts:186](https://github.com/rhdeck/serverless-resources/blob/4848db1/src/index.ts#L186)*
+*Defined in [index.ts:186](https://github.com/rhdeck/serverless-resources/blob/fd753e7/src/index.ts#L186)*
 
 Get Local Secondary Indicies for a table
 
@@ -251,7 +251,7 @@ ___
 
 ▸ **getOutputs**(`cmd`: object): *Promise‹object›*
 
-*Defined in [index.ts:282](https://github.com/rhdeck/serverless-resources/blob/4848db1/src/index.ts#L282)*
+*Defined in [index.ts:282](https://github.com/rhdeck/serverless-resources/blob/fd753e7/src/index.ts#L282)*
 
 Get outputs of a single stack at the path in question
 
@@ -279,7 +279,7 @@ ___
 
 ▸ **getResources**(`cmd`: object): *Promise‹undefined | string | object›*
 
-*Defined in [index.ts:327](https://github.com/rhdeck/serverless-resources/blob/4848db1/src/index.ts#L327)*
+*Defined in [index.ts:327](https://github.com/rhdeck/serverless-resources/blob/fd753e7/src/index.ts#L327)*
 
 Get resources of the stack at this path
 
@@ -307,7 +307,7 @@ ___
 
 ▸ **getServiceName**(`path?`: undefined | string): *any*
 
-*Defined in [index.ts:80](https://github.com/rhdeck/serverless-resources/blob/4848db1/src/index.ts#L80)*
+*Defined in [index.ts:80](https://github.com/rhdeck/serverless-resources/blob/fd753e7/src/index.ts#L80)*
 
 Get name of stack we are building right here
 
@@ -327,7 +327,7 @@ ___
 
 ▸ **getStreamArnForDatabaseTable**(`TableName`: string, `region`: string): *Promise‹undefined | string›*
 
-*Defined in [index.ts:110](https://github.com/rhdeck/serverless-resources/blob/4848db1/src/index.ts#L110)*
+*Defined in [index.ts:110](https://github.com/rhdeck/serverless-resources/blob/fd753e7/src/index.ts#L110)*
 
 Get Stream for database
 
@@ -348,7 +348,7 @@ ___
 
 ▸ **getUnqualifiedArnForLambda**(`FunctionName`: string, `region`: string): *Promise‹undefined | string›*
 
-*Defined in [index.ts:237](https://github.com/rhdeck/serverless-resources/blob/4848db1/src/index.ts#L237)*
+*Defined in [index.ts:237](https://github.com/rhdeck/serverless-resources/blob/fd753e7/src/index.ts#L237)*
 
 Get the unqualified arn of a lambda
 
@@ -369,7 +369,7 @@ ___
 
 ▸ **isDDBResource**(`resource`: object): *boolean*
 
-*Defined in [index.ts:259](https://github.com/rhdeck/serverless-resources/blob/4848db1/src/index.ts#L259)*
+*Defined in [index.ts:259](https://github.com/rhdeck/serverless-resources/blob/fd753e7/src/index.ts#L259)*
 
 Detect whether a given resource is for DDB
 
