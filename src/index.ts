@@ -325,8 +325,6 @@ export async function getOutputs(cmd: {
  * @param cmd Inputs from command line tool
  */
 export async function getResources(cmd: {
-  json: boolean;
-  yaml: boolean;
   service?: string;
   path?: string;
   region?: string;
@@ -352,7 +350,7 @@ export async function getResources(cmd: {
       NextToken: undefined,
       StackResourceSummaries: undefined,
     };
-    if (!StackResourceSummaries) return;
+    if (!StackResourceSummaries) return {};
     StackResourceSummaries.forEach((o) => {
       obj[o.LogicalResourceId] = o;
       if (isDDBResource(o)) {
@@ -430,16 +428,7 @@ export async function getResources(cmd: {
     }
   });
   await Promise.all(promises);
-
-  if (cmd.json) {
-    const json = JSON.stringify(obj, null, 2);
-    return json;
-  } else if (cmd.yaml) {
-    const yml = yaml.stringify(obj);
-    return yml;
-  } else {
-    return obj;
-  }
+  return obj;
 }
 /**
  * Get profile for Appsync resource in this stack
