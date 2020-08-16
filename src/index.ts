@@ -280,8 +280,8 @@ async function getArnForRole(role: string, region: string = "us-east-1") {
  * @param cmd Command line options from the tool
  */
 export async function getOutputs(cmd: {
-  json: boolean;
-  yaml: boolean;
+  json?: boolean;
+  yaml?: boolean;
   service?: string;
   path?: string;
   region?: string;
@@ -438,8 +438,8 @@ export async function getResources(cmd: {
 export async function getAppSync(
   appResources: { [key: string]: any },
   cmd: {
-    json: boolean;
-    yaml: boolean;
+    json?: boolean;
+    yaml?: boolean;
     service?: string;
     path?: string;
     region?: string;
