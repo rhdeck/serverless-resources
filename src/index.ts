@@ -331,7 +331,7 @@ export async function getResources(cmd: {
   stage?: string;
   awsProfile?: string;
 }) {
-  console.log("starting getresources with cmd", cmd);
+  // console.log("starting getresources with cmd", cmd);
   configAWS(AWS, cmd.awsProfile);
   const region = cmd.region || "us-east-1";
   const stage = cmd.stage || findStage() || "dev";
@@ -351,7 +351,7 @@ export async function getResources(cmd: {
       NextToken: undefined,
       StackResourceSummaries: undefined,
     };
-    console.log(StackResourceSummaries);
+    // console.log(StackResourceSummaries);
     if (!StackResourceSummaries) return {};
     StackResourceSummaries.forEach((o) => {
       obj[o.LogicalResourceId] = o;
